@@ -1,685 +1,171 @@
 <!DOCTYPE html>
 
-
-
 <html lang="en">
-
-
 
 <head>
 
-
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-
 
 <title>Watch What You Want</title>
 
-
-
 <style>
 
+body {
 
+margin: 0;
 
-  * { box-sizing: border-box; }
+font-family: Arial;
 
+background: #050505;
 
+color: white;
 
-  body {
-
-
-
-    margin: 0;
-
-
-
-    font-family: Arial, sans-serif;
-
-
-
-    background: #050505;
-
-
-
-    color: white;
-
-
-
-  }
-
-
-
-  .hero {
-
-
-
-    min-height: 100vh;
-
-
-
-    padding: 30px 20px;
-
-
-
-    background:
-
-
-
-      linear-gradient(to bottom, rgba(0,0,0,.3), #050505),
-
-
-
-      radial-gradient(circle at top, #7b1113, #050505 60%);
-
-
-
-  }
-
-
-
-  .logo {
-
-
-
-    font-size: 28px;
-
-
-
-    font-weight: 900;
-
-
-
-    color: #e50914;
-
-
-
-    letter-spacing: 1px;
-
-
-
-    margin-bottom: 50px;
-
-
-
-  }
-
-
-
-  .content {
-
-
-
-    max-width: 850px;
-
-
-
-    margin: auto;
-
-
-
-    text-align: center;
-
-
-
-    padding-top: 40px;
-
-
-
-  }
-
-
-
-  h1 {
-
-
-
-    font-size: clamp(42px, 9vw, 92px);
-
-
-
-    line-height: 1;
-
-
-
-    margin: 0 0 20px;
-
-
-
-  }
-
-
-
-  p {
-
-
-
-    font-size: 20px;
-
-
-
-    color: #d0d0d0;
-
-
-
-  }
-
-
-
-  .search {
-
-
-
-    margin: 35px auto;
-
-
-
-    display: flex;
-
-
-
-    max-width: 650px;
-
-
-
-    background: white;
-
-
-
-    border-radius: 999px;
-
-
-
-    overflow: hidden;
-
-
-
-  }
-
-
-
-  input {
-
-
-
-    flex: 1;
-
-
-
-    border: none;
-
-
-
-    padding: 18px 22px;
-
-
-
-    font-size: 18px;
-
-
-
-    outline: none;
-
-
-
-  }
-
-
-
-  button {
-
-
-
-    border: none;
-
-
-
-    background: #e50914;
-
-
-
-    color: white;
-
-
-
-    padding: 18px 28px;
-
-
-
-    font-size: 18px;
-
-
-
-    font-weight: bold;
-
-
-
-  }
-
-
-
-  .cards {
-
-
-
-    display: grid;
-
-
-
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-
-
-
-    gap: 18px;
-
-
-
-    margin-top: 35px;
-
-
-
-  }
-
-
-
-  .card {
-
-
-
-    background: #151515;
-
-
-
-    border-radius: 18px;
-
-
-
-    padding: 22px;
-
-
-
-    border: 1px solid #292929;
-
-
-
-    box-shadow: 0 12px 30px rgba(0,0,0,.4);
-
-
-
-  }
-
-
-
-  .poster {
-
-
-
-    height: 220px;
-
-
-
-    border-radius: 14px;
-
-
-
-    background: linear-gradient(145deg, #333, #111);
-
-
-
-    display: flex;
-
-
-
-    align-items: center;
-
-
-
-    justify-content: center;
-
-
-
-    color: #888;
-
-
-
-    font-size: 48px;
-
-
-
-    margin-bottom: 15px;
-
-
-
-  }
-
-
-
-  .tag {
-
-
-
-    display: inline-block;
-
-
-
-    background: #222;
-
-
-
-    border-radius: 999px;
-
-
-
-    padding: 7px 12px;
-
-
-
-    margin-top: 10px;
-
-
-
-    color: #ccc;
-
-
-
-    font-size: 14px;
-
-
-
-  }
-
-
-
-  @media (max-width: 600px) {
-
-
-
-    .search {
-
-
-
-      flex-direction: column;
-
-
-
-      border-radius: 18px;
-
-
-
-    }
-
-
-
-    button {
-
-
-
-      width: 100%;
-
-
-
-    }
-
-
-
-  }
-
-
-
-</style>
-
-
-
-</head>
-
-
-
-<body>
-
-
-
-<div class="hero">
-
-
-
-  <div class="logo">WATCH WHAT YOU WANT</div>
-
-
-
-  <div class="content">
-
-
-
-    <h1>Find where anything is streaming.</h1>
-
-
-
-    <p>Search a movie or show and see where to watch it.</p>
-
-
-
-    <div class="search">
-
-
-
-      <input id="searchBox" placeholder="Search Batman, Yellowstone, Top Gun..." />
-
-
-
-      <button onclick="search()">Search</button>
-
-
-
-    </div>
-
-
-
-    <div id="results" class="cards">
-
-
-
-      <div class="card">
-
-
-
-        <div class="poster">🎬</div>
-
-
-
-        <h3>Search any title</h3>
-
-
-
-        <span class="tag">Netflix-style prototype</span>
-
-
-
-      </div>
-
-
-
-      <div class="card">
-
-
-
-        <div class="poster">🍿</div>
-
-
-
-        <h3>Streaming locations</h3>
-
-
-
-        <span class="tag">Coming next</span>
-
-
-
-      </div>
-
-
-
-      <div class="card">
-
-
-
-        <div class="poster">⭐</div>
-
-
-
-        <h3>Watchlist</h3>
-
-
-
-        <span class="tag">Coming soon</span>
-
-
-
-      </div>
-
-
-
-    </div>
-
-
-
-  </div>
-
-
-
-</div>
-
-
-
-<script>
-
-
-
-function search() {
-
-
-
-  const query = document.getElementById("searchBox").value.trim();
-
-
-
-  const results = document.getElementById("results");
-
-
-
-  if (!query) {
-
-
-
-    results.innerHTML = `
-
-
-
-      <div class="card">
-
-
-
-        <div class="poster">⚠️</div>
-
-
-
-        <h3>Type a movie or show first</h3>
-
-
-
-        <span class="tag">Try Batman</span>
-
-
-
-      </div>
-
-
-
-    `;
-
-
-
-    return;
-
-
-
-  }
-
-
-
-  results.innerHTML = `
-
-
-
-    <div class="card">
-
-
-
-      <div class="poster">🎥</div>
-
-
-
-      <h3>${query}</h3>
-
-
-
-      <p>Available on:</p>
-
-
-
-      <span class="tag">Netflix</span>
-
-
-
-      <span class="tag">Prime Video</span>
-
-
-
-      <span class="tag">Hulu</span>
-
-
-
-    </div>
-
-
-
-    <div class="card">
-
-
-
-      <div class="poster">🔥</div>
-
-
-
-      <h3>Best Match</h3>
-
-
-
-      <p>We found streaming options for your search.</p>
-
-
-
-      <span class="tag">Prototype data</span>
-
-
-
-    </div>
-
-
-
-  `;
-
-
+text-align: center;
 
 }
 
+.container {
 
+padding: 40px 20px;
+
+max-width: 1000px;
+
+margin: auto;
+
+}
+
+h1 {
+
+font-size: 50px;
+
+}
+
+input {
+
+padding: 15px;
+
+width: 60%;
+
+max-width: 400px;
+
+border-radius: 30px;
+
+border: none;
+
+font-size: 16px;
+
+}
+
+button {
+
+padding: 15px 25px;
+
+border: none;
+
+border-radius: 30px;
+
+background: #e50914;
+
+color: white;
+
+font-size: 16px;
+
+margin-left: 10px;
+
+cursor: pointer;
+
+}
+
+.grid {
+
+margin-top: 40px;
+
+display: grid;
+
+grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+
+gap: 20px;
+
+}
+
+.card img {
+
+width: 100%;
+
+border-radius: 10px;
+
+}
+
+.card p {
+
+font-size: 14px;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Watch What You Want</h1>
+
+<input id="searchBox" placeholder="Search movies..." />
+
+<button onclick="search()">Search</button>
+
+<div id="results" class="grid"></div>
+
+</div>
+
+<script>
+
+const API_KEY = "PASTE_YOUR_KEY_HERE"
+
+async function search() {
+
+const query = document.getElementById("searchBox").value;
+
+const res = await fetch(
+
+`https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${query}`
+
+);
+
+const data = await res.json();
+
+const results = document.getElementById("results");
+
+results.innerHTML = ""
+
+data.results.forEach(movie => {
+
+const poster = movie.poster_path
+
+? "https://image.tmdb.org/t/p/w500" + movie.poster_path
+
+: ""
+
+results.innerHTML += `
+
+<div class="card">
+
+<img src="${poster}" />
+
+<p>${movie.title}</p>
+
+</div>
+
+`;
+
+});
+
+}
 
 </script>
 
-
-
 </body>
-
-
 
 </html>
