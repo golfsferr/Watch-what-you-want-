@@ -128,6 +128,87 @@ async function search() {
 
 const query = document.getElementById("searchBox").value;
 
+const resultsDiv = document.getElementById("results");
+
+resultsDiv.innerHTML = "Loading..."
+
+const res = await fetch(
+
+`https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${query}`
+
+);
+
+const data = await res.json();
+
+resultsDiv.innerHTML = ""
+
+for (const movie of data.results.slice(0, 8)) {
+
+const poster = movie.poster_path
+
+? "https://image.tmdb.org/t/p/w500" + movie.poster_path
+
+: ""
+
+// 🔥 Get streaming providers
+
+const providerRes = await fetch(
+
+`https://api.themoviedb.org/3/movie/${movie.id}/watch/providers?api_key=${API_KEY}`
+
+);
+
+const providerData = await providerRes.json();
+
+let providers = [];
+
+if (providerData.results && providerData.results.US) {
+
+const us = providerData.results.US;
+
+if (us.flatrate) {
+
+providers = us.flatrate.map(p => p.provider_name);
+
+} else if (us.buy) {
+
+providers = us.buy.map(p => p.provider_name);
+
+} else if (us.rent) {
+
+providers = us.rent.map(p => p.provider_name);
+
+}
+
+}
+
+const providerText = providers.length
+
+? providers.slice(0, 3).join(", ")
+
+: "Not available"
+
+resultsDiv.innerHTML += `
+
+<div class="card">
+
+<img src="${poster}" />
+
+<p><strong>${movie.title}</strong></p>
+
+<p style="font-size:12px;color:#ccc;">${providerText}</p>
+
+</div>
+
+`;
+
+}
+
+}
+
+
+const query = document.getElementById("searchBox").value;
+
 const res = await fetch(
 
 `https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${query}`
