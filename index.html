@@ -319,7 +319,7 @@ function renderMovies(movies) {
       <div class="card" onclick="openMovieDetails(${movie.id})">
         <img src="${poster}" />
         <div class="cardText">
-          <strong>${movie.title}</strong>
+          <strong>${movie.title || movie.name}</strong>
           <p>${year} • ⭐ ${rating}</p>
           <span class="badge">View Details</span>
         </div>
