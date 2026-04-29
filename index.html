@@ -106,21 +106,15 @@ function showCards(items) {
   });
 }
 
-function openDetails(id, type) {
-  const modal = document.getElementById("movieModal");
-  const modalBody = document.getElementById("modalBody");
+const modal = document.getElementById("movieModal");
+const modalBody = document.getElementById("modalBody");
 
-  modal.style.display = "block";
-  modalBody.innerHTML = "Loading...";
+modal.style.display = "block";
+modalBody.innerHTML = "Loading...";
 
-  const detailsUrl = "https://api.themoviedb.org/3/" + type + "/" + id + "?api_key=" + API_KEY;
-  const providerUrl = "https://api.themoviedb.org/3/" + type + "/" + id + "/watch/providers?api_key=" + API_KEY;
-
-  Promise.all([
-    fetch(detailsUrl).then(res => res.json()),
-    fetch(providerUrl).then(res => res.json())
-  ])
-  .then(([item, providerData]) => {
+fetch("https://api.themoviedb.org/3/" + type + "/" + id + "?api_key=" + API_KEY)
+  .then(res => res.json())
+  .then(item => {
 
     const title = item.title || item.name || "Untitled";
     const date = item.release_date || item.first_air_date || "Unknown";
@@ -130,50 +124,26 @@ function openDetails(id, type) {
       ? "https://image.tmdb.org/t/p/w500" + item.poster_path
       : "https://via.placeholder.com/220x330?text=No+Poster";
 
-    let providers = [];
-
-    if (providerData.results && providerData.results.US) {
-      const us = providerData.results.US;
-
-      if (us.flatrate) {
-        providers = us.flatrate.map(p => p.provider_name);
-      } else if (us.rent) {
-        providers = us.rent.map(p => p.provider_name);
-      } else if (us.buy) {
-        providers = us.buy.map(p => p.provider_name);
-      }
-    }
-
-    const providerText = providers.length
-      ? providers.join(", ")
-      : "No streaming info";
-
     modalBody.innerHTML = `
-      <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start;">
-        
-        <img src="${poster}" style="width:220px;border-radius:12px;background:#222;">
-        
-        <div style="flex:1;min-width:250px;">
+      <div style="display:flex;gap:20px;flex-wrap:wrap;">
+        <img src="${poster}" style="width:220px;border-radius:12px;">
+        <div>
           <h2>${title}</h2>
-          <p><strong>Release:</strong> ${date}</p>
-          <p><strong>Rating:</strong> ⭐ ${rating}</p>
-          <p>${item.overview || "No description available."}</p>
-          <p><strong>Available on:</strong> ${providerText}</p>
+          <p>${date}</p>
+          <p>⭐ ${rating}</p>
+          <p>${item.overview || "No description"}</p>
 
           <a href="https://www.justwatch.com/us/search?q=${encodeURIComponent(title)}"
              target="_blank"
-             style="display:inline-block;margin-top:10px;color:white;background:#e50914;padding:12px 18px;border-radius:999px;text-decoration:none;">
+             style="display:inline-block;margin-top:10px;background:#e50914;padding:12px 18px;border-radius:999px;color:white;text-decoration:none;">
              Where to Watch
           </a>
-
         </div>
-
       </div>
     `;
   })
-  .catch(error => {
-    console.log(error);
-    modalBody.innerHTML = "Could not load details.";
+  .catch(() => {
+    modalBody.innerHTML = "Error loading details.";
   });
 }
     }
