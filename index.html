@@ -125,9 +125,9 @@ function openDetails(id, type) {
   : "https://via.placeholder.com/220x330?text=No+Poster";
 
 modalBody.innerHTML = `
-  <div style="display:flex;gap:20px;flex-wrap:wrap;">
+  <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start;">
     
-    <img src="${poster}" style="width:220px;border-radius:12px;background:#222;">
+    <img src="${poster}" style="width:220px;height:auto;border-radius:12px;background:#222;">
     
     <div style="flex:1;min-width:250px;">
       <h2>${title}</h2>
@@ -137,7 +137,7 @@ modalBody.innerHTML = `
 
       <a href="https://www.google.com/search?q=watch+${encodeURIComponent(title)}"
          target="_blank"
-         style="color:white;background:#e50914;padding:12px 18px;border-radius:999px;text-decoration:none;">
+         style="display:inline-block;margin-top:10px;color:white;background:#e50914;padding:12px 18px;border-radius:999px;text-decoration:none;">
          Where to Watch
       </a>
 
