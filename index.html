@@ -308,9 +308,14 @@ async function openMovieDetails(movieId) {
           <p><strong>Rating:</strong> ⭐ ${movie.vote_average ? movie.vote_average.toFixed(1) : "N/A"}</p>
           <p>${movie.overview || "No description available."}</p>
 
-          <p><strong>Where to watch:</strong><br>
-          ${providers.length ? providers.join(", ") : "No streaming info found"}</p>
-
+          <p><strong>Where to watch:</strong></p>
+<div style="margin-top:10px;">
+  ${
+    providers.length
+      ? providers.map(p => `<span class="badge">${p}</span>`).join(" ")
+      : "<span class='badge'>No streaming info</span>"
+  }
+</div>
           <a class="actionLink" href="${watchLink}" target="_blank">Where to Watch</a>
           ${trailerLink ? `<a class="actionLink secondary" href="${trailerLink}" target="_blank">Watch Trailer</a>` : ""}
         </div>
