@@ -219,26 +219,26 @@ button {
 <p class="footerNote">Movie and TV data powered by TMDb. Streaming availability may vary by region.</p>
 
 <script>
-const API_KEY = const API_KEY = "b863c63714c639df3e613a7adbb57f34";
+<script>
+const API_KEY = "b863c63714c639df3e613a7adbb57f34";
 
 async function loadTrending() {
   const resultsDiv = document.getElementById("results");
   const sectionTitle = document.getElementById("sectionTitle");
 
   sectionTitle.innerText = "Trending Movies";
-  resultsDiv.innerHTML = "Loading trending movies...";
+  resultsDiv.innerHTML = "Loading...";
 
   try {
     const res = await fetch(
       `https://api.themoviedb.org/3/trending/movie/week?api_key=${API_KEY}`
     );
-
     const data = await res.json();
-    renderResults(data.results.slice(0, 12));
 
-  } catch (error) {
-    console.error(error);
-    resultsDiv.innerHTML = "Something went wrong loading trending movies.";
+    renderResults(data.results.slice(0, 12));
+  } catch (err) {
+    console.error(err);
+    resultsDiv.innerHTML = "Error loading trending.";
   }
 }
 
@@ -252,7 +252,7 @@ async function searchMovies() {
     return;
   }
 
-  sectionTitle.innerText = `Search Results: ${query}`;
+  sectionTitle.innerText = `Search: ${query}`;
   resultsDiv.innerHTML = "Searching...";
 
   try {
@@ -266,16 +266,10 @@ async function searchMovies() {
       item.media_type === "movie" || item.media_type === "tv"
     );
 
-    if (!filtered.length) {
-      resultsDiv.innerHTML = "No results found.";
-      return;
-    }
-
     renderResults(filtered.slice(0, 12));
-
-  } catch (error) {
-    console.error(error);
-    resultsDiv.innerHTML = "Something went wrong searching.";
+  } catch (err) {
+    console.error(err);
+    resultsDiv.innerHTML = "Search failed.";
   }
 }
 
@@ -288,19 +282,16 @@ function renderResults(items) {
       ? "https://image.tmdb.org/t/p/w500" + item.poster_path
       : "";
 
-    const title = item.title || item.name || "Untitled";
+    const title = item.title || item.name || "No title";
     const date = item.release_date || item.first_air_date;
     const year = date ? date.substring(0, 4) : "Unknown";
-    const rating = item.vote_average ? item.vote_average.toFixed(1) : "N/A";
-    const type = item.media_type === "tv" ? "TV Show" : "Movie";
 
     resultsDiv.innerHTML += `
       <div class="card" onclick="openDetails(${item.id}, '${item.media_type}')">
         <img src="${poster}" />
         <div class="cardText">
           <strong>${title}</strong>
-          <p>${year} • ⭐ ${rating}</p>
-          <span class="badge">${type}</span>
+          <p>${year}</p>
         </div>
       </div>
     `;
@@ -312,100 +303,29 @@ async function openDetails(id, type) {
   const modalBody = document.getElementById("modalBody");
 
   modal.style.display = "block";
-  modalBody.innerHTML = "Loading details...";
+  modalBody.innerHTML = "Loading...";
 
   try {
-    const detailsRes = await fetch(
+    const res = await fetch(
       `https://api.themoviedb.org/3/${type}/${id}?api_key=${API_KEY}`
     );
 
-    const providerRes = await fetch(
-      `https://api.themoviedb.org/3/${type}/${id}/watch/providers?api_key=${API_KEY}`
-    );
-
-    const videoRes = await fetch(
-      `https://api.themoviedb.org/3/${type}/${id}/videos?api_key=${API_KEY}`
-    );
-
-    const item = await detailsRes.json();
-    const providerData = await providerRes.json();
-    const videoData = await videoRes.json();
-
-    const title = item.title || item.name || "Untitled";
-
-    const poster = item.poster_path
-      ? "https://image.tmdb.org/t/p/w500" + item.poster_path
-      : "";
-
-    const date = item.release_date || item.first_air_date || "Unknown";
-    const rating = item.vote_average ? item.vote_average.toFixed(1) : "N/A";
-
-    let providers = [];
-    let watchLink = `https://www.themoviedb.org/${type}/${id}`;
-
-    if (providerData.results && providerData.results.US) {
-      const us = providerData.results.US;
-      watchLink = us.link || watchLink;
-
-      if (us.flatrate) {
-        providers = us.flatrate;
-      } else if (us.rent) {
-        providers = us.rent;
-      } else if (us.buy) {
-        providers = us.buy;
-      }
-    }
-
-    const trailer = videoData.results.find(
-      v => v.site === "YouTube" && v.type === "Trailer"
-    );
+    const data = await res.json();
 
     modalBody.innerHTML = `
-      <div class="modalTop">
-        <img src="${poster}" />
-        <div class="modalInfo">
-          <h2>${title}</h2>
-          <p><strong>Type:</strong> ${type === "tv" ? "TV Show" : "Movie"}</p>
-          <p><strong>Release:</strong> ${date}</p>
-          <p><strong>Rating:</strong> ⭐ ${rating}</p>
-          <p>${item.overview || "No description available."}</p>
-
-          <p><strong>Where to watch:</strong></p>
-          <div>
-            ${
-              providers.length
-                ? providers.map(p => `
-                    <span class="badge">
-                      ${p.logo_path ? `<img src="https://image.tmdb.org/t/p/w92${p.logo_path}" style="height:24px;vertical-align:middle;border-radius:6px;margin-right:6px;">` : ""}
-                      ${p.provider_name}
-                    </span>
-                  `).join(" ")
-                : "<span class='badge'>No streaming info</span>"
-            }
-          </div>
-
-          <a class="actionLink" href="${watchLink}" target="_blank">Where to Watch</a>
-        </div>
-      </div>
-
-      ${
-        trailer
-          ? `<div style="margin-top:25px;">
-              <iframe width="100%" height="360" src="https://www.youtube.com/embed/${trailer.key}" frameborder="0" allowfullscreen></iframe>
-             </div>`
-          : ""
-      }
+      <h2>${data.title || data.name}</h2>
+      <p>${data.overview || "No description"}</p>
     `;
-
-  } catch (error) {
-    console.error(error);
-    modalBody.innerHTML = "Something went wrong loading details.";
+  } catch (err) {
+    console.error(err);
+    modalBody.innerHTML = "Error loading details.";
   }
 }
 
 function closeModal() {
   document.getElementById("movieModal").style.display = "none";
 }
+</script>
 </script>
 
 </body>
