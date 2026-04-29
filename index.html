@@ -134,7 +134,8 @@ function openDetails(id, type) {
     .then(res => res.json())
     .then(item => {
 
-      const title = item.title || item.name;
+      const title = item.title || item.name || "Untitled";
+
       const poster = item.poster_path
         ? "https://image.tmdb.org/t/p/w500" + item.poster_path
         : "";
@@ -142,13 +143,17 @@ function openDetails(id, type) {
       body.innerHTML = `
         <h2>${title}</h2>
         <img src="${poster}" style="width:200px">
-        <p>${item.overview}</p>
+        <p>${item.overview || ""}</p>
 
-        <a href="https://www.justwatch.com/us/search?q=${encodeURIComponent(title)}" target="_blank"
-        style="display:inline-block;margin-top:10px;background:red;padding:10px;color:white;">
-        Where to Watch
+        <a href="https://www.justwatch.com/us/search?q=${encodeURIComponent(title)}"
+           target="_blank"
+           style="display:inline-block;margin-top:10px;background:red;padding:10px;color:white;">
+           Where to Watch
         </a>
       `;
+    })
+    .catch(() => {
+      body.innerHTML = "Error loading details.";
     });
 }
 
