@@ -125,7 +125,7 @@ function openDetails(id, type) {
         <p><strong>Release:</strong> ${date}</p>
         <p><strong>Rating:</strong> ⭐ ${rating}</p>
         <p>${item.overview || "No description available."}</p>
-        <a href="https://www.themoviedb.org/${type}/${id}" target="_blank" style="color:white;background:#e50914;padding:12px 18px;border-radius:999px;text-decoration:none;">Where to Watch</a>
+       <a href="https://www.google.com/search?q=watch+${encodeURIComponent(title)}" target="_blank" style="color:white;background:#e50914;padding:12px 18px;border-radius:999px;text-decoration:none;">Where to Watch</a>
       `;
     })
     .catch(error => {
