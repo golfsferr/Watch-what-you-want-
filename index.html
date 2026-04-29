@@ -1,38 +1,39 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Watch What You Want</title>
+<meta name="description" content="Search movies and TV shows, see trailers, ratings, and where to watch.">
 
 <style>
-body {
-  margin:0;
-  font-family:Arial;
-  background:#050505;
-  color:white;
-}
+body { margin:0; font-family:Arial; background:#050505; color:white; }
 
 .hero {
-  padding:40px;
+  padding:45px 20px;
   text-align:center;
-  background:linear-gradient(#7b1113,#050505);
+  background:radial-gradient(circle at top,#8b1118,#050505 65%);
 }
 
+h1 { font-size:clamp(40px,8vw,80px); margin-bottom:10px; }
+
+.subtitle { color:#ccc; }
+
 input {
-  padding:15px;
+  padding:16px;
   width:60%;
-  max-width:400px;
+  max-width:500px;
   border-radius:30px;
   border:none;
 }
 
 button {
-  padding:15px;
+  padding:16px;
   border:none;
   border-radius:30px;
   background:#e50914;
   color:white;
   cursor:pointer;
+  font-weight:bold;
 }
 
 .grid {
@@ -42,8 +43,12 @@ button {
   padding:20px;
 }
 
+.card { cursor:pointer; }
+
 .card img {
   width:100%;
+  height:270px;
+  object-fit:cover;
   border-radius:10px;
 }
 
@@ -53,15 +58,39 @@ button {
   inset:0;
   background:rgba(0,0,0,.9);
   padding:20px;
+  overflow:auto;
 }
 
 .modalContent {
   background:#111;
   padding:20px;
-  border-radius:10px;
-  max-width:800px;
+  border-radius:12px;
+  max-width:900px;
   margin:auto;
 }
+
+.badge {
+  display:inline-block;
+  background:#222;
+  padding:8px 12px;
+  border-radius:999px;
+  margin:4px;
+  text-decoration:none;
+  color:white;
+  font-size:13px;
+}
+
+.action {
+  display:inline-block;
+  margin-top:12px;
+  background:#e50914;
+  padding:10px 16px;
+  border-radius:999px;
+  color:white;
+  text-decoration:none;
+}
+
+iframe { margin-top:20px; border-radius:12px; }
 </style>
 </head>
 
@@ -69,7 +98,9 @@ button {
 
 <div class="hero">
   <h1>Watch What You Want</h1>
-  <input id="searchBox" placeholder="Search movies or shows">
+  <p class="subtitle">Search movies and TV shows. See ratings, trailers, and where to watch.</p>
+
+  <input id="searchInput" placeholder="Search Batman, Top Gun..." onkeydown="if(event.key==='Enter') search()">
   <button onclick="search()">Search</button>
 </div>
 
@@ -93,9 +124,9 @@ function loadTrending() {
 }
 
 function search() {
-  const q = document.getElementById("searchBox").value;
+  const q = document.getElementById("searchInput").value;
 
-  fetch("https://api.themoviedb.org/3/search/multi?api_key=" + API_KEY + "&query=" + q)
+  fetch("https://api.themoviedb.org/3/search/multi?api_key=" + API_KEY + "&query=" + encodeURIComponent(q))
     .then(res => res.json())
     .then(data => {
       const filtered = data.results.filter(x => x.media_type === "movie" || x.media_type === "tv");
@@ -108,11 +139,10 @@ function show(list) {
   results.innerHTML = "";
 
   list.forEach(item => {
+    const title = item.title || item.name || "Untitled";
     const poster = item.poster_path
       ? "https://image.tmdb.org/t/p/w500" + item.poster_path
       : "";
-
-    const title = item.title || item.name;
 
     results.innerHTML += `
       <div class="card" onclick="openDetails(${item.id}, '${item.media_type}')">
@@ -130,32 +160,66 @@ function openDetails(id, type) {
   modal.style.display = "block";
   body.innerHTML = "Loading...";
 
-  fetch("https://api.themoviedb.org/3/" + type + "/" + id + "?api_key=" + API_KEY)
-    .then(res => res.json())
-    .then(item => {
+  Promise.all([
+    fetch("https://api.themoviedb.org/3/" + type + "/" + id + "?api_key=" + API_KEY).then(r=>r.json()),
+    fetch("https://api.themoviedb.org/3/" + type + "/" + id + "/watch/providers?api_key=" + API_KEY).then(r=>r.json()),
+    fetch("https://api.themoviedb.org/3/" + type + "/" + id + "/videos?api_key=" + API_KEY).then(r=>r.json())
+  ])
+  .then(([item, providersData, videos]) => {
 
-      const title = item.title || item.name || "Untitled";
-const date = item.release_date || item.first_air_date || "Unknown";
-      const poster = item.poster_path
-        ? "https://image.tmdb.org/t/p/w500" + item.poster_path
-        : "";
+    const title = item.title || item.name || "Untitled";
+    const date = item.release_date || item.first_air_date || "Unknown";
+    const rating = item.vote_average ? item.vote_average.toFixed(1) : "N/A";
+    const poster = item.poster_path
+      ? "https://image.tmdb.org/t/p/w500" + item.poster_path
+      : "";
 
-      body.innerHTML = `
-        <h2>${title}</h2>
-        <p><strong>Release:</strong> ${item.release_date || item.first_air_date || "Unknown"}</p>
-        <img src="${poster}" style="width:200px">
-        <p>${item.overview || ""}</p>
+    let providers = [];
 
-        <a href="https://www.justwatch.com/us/search?q=${encodeURIComponent(title)}"
-           target="_blank"
-           style="display:inline-block;margin-top:10px;background:red;padding:10px;color:white;">
-           Where to Watch
-        </a>
-      `;
-    })
-    .catch(() => {
-      body.innerHTML = "Error loading details.";
-    });
+    if (providersData.results && providersData.results.US) {
+      const us = providersData.results.US;
+
+      if (us.flatrate) providers = us.flatrate;
+      else if (us.rent) providers = us.rent;
+      else if (us.buy) providers = us.buy;
+    }
+
+    const providerButtons = providers.length
+      ? providers.map(p => `
+          <a class="badge"
+             href="https://www.google.com/search?q=${encodeURIComponent(p.provider_name + " " + title + " watch")}"
+             target="_blank">
+             ${p.provider_name}
+          </a>
+        `).join("")
+      : "<span class='badge'>No streaming info</span>";
+
+    const trailer = videos.results
+      ? videos.results.find(v => v.site==="YouTube" && v.type==="Trailer")
+      : null;
+
+    const trailerHTML = trailer
+      ? `<iframe width="100%" height="360" src="https://www.youtube.com/embed/${trailer.key}" frameborder="0" allowfullscreen></iframe>`
+      : "";
+
+    body.innerHTML = `
+      <h2>${title}</h2>
+      <p><strong>Release:</strong> ${date}</p>
+      <p><strong>Rating:</strong> ⭐ ${rating}</p>
+      <img src="${poster}" style="width:200px">
+      <p>${item.overview || ""}</p>
+
+      <div><strong>Available on:</strong><br>${providerButtons}</div>
+
+      <a class="action"
+         href="https://www.justwatch.com/us/search?q=${encodeURIComponent(title)}"
+         target="_blank">
+         Where to Watch
+      </a>
+
+      ${trailerHTML}
+    `;
+  });
 }
 
 function closeModal() {
