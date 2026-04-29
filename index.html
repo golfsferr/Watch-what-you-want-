@@ -1,79 +1,56 @@
 <!DOCTYPE html>
-
 <html lang="en">
-
 <head>
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Watch What You Want</title>
 
 <style>
-
 body {
-
-margin: 0;
-
-font-family: Arial;
-
-background: #050505;
-
-color: white;
-
-text-align: center;
-
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #050505;
+  color: white;
 }
 
 .container {
-
-padding: 40px 20px;
-
-max-width: 1000px;
-
-margin: auto;
-
+  padding: 35px 20px;
+  max-width: 1200px;
+  margin: auto;
+  text-align: center;
 }
 
 h1 {
+  font-size: clamp(36px, 7vw, 72px);
+  margin-bottom: 10px;
+}
 
-font-size: 48px;
+.subtitle {
+  color: #ccc;
+  font-size: 18px;
+}
 
+.searchArea {
+  margin: 30px auto;
 }
 
 input {
-
-padding: 15px;
-
-width: 60%;
-
-max-width: 400px;
-
-border-radius: 30px;
-
-border: none;
-
-font-size: 16px;
-
+  padding: 16px 20px;
+  width: 60%;
+  max-width: 450px;
+  border-radius: 30px;
+  border: none;
+  font-size: 16px;
 }
 
 button {
-
-padding: 15px 25px;
-
-border: none;
-
-border-radius: 30px;
-
-background: #e50914;
-
-color: white;
-
-font-size: 16px;
-
-margin-left: 10px;
-
-cursor: pointer;
-
+  padding: 16px 25px;
+  border: none;
+  border-radius: 30px;
+  background: #e50914;
+  color: white;
+  font-size: 16px;
+  margin-left: 10px;
+  cursor: pointer;
 }
 
 .grid {
@@ -81,7 +58,6 @@ cursor: pointer;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 25px;
-  padding: 0 30px;
 }
 
 .card {
@@ -90,193 +66,267 @@ cursor: pointer;
   overflow: hidden;
   text-decoration: none;
   color: white;
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  cursor: pointer;
+  transition: transform .25s ease, box-shadow .25s ease;
 }
 
 .card:hover {
-  transform: scale(1.07);
-  box-shadow: 0 15px 40px rgba(0,0,0,0.7);
+  transform: scale(1.05);
+  box-shadow: 0 15px 40px rgba(0,0,0,.7);
 }
 
 .card img {
   width: 100%;
   height: 320px;
   object-fit: cover;
+  background: #222;
 }
 
-.card p {
-  margin: 10px;
-}
-font-size: 14px;
-
+.cardText {
+  padding: 12px;
+  text-align: left;
 }
 
+.cardText p {
+  margin: 6px 0;
+  color: #ccc;
+  font-size: 14px;
+}
+
+.badge {
+  color: #fff;
+  background: #222;
+  padding: 5px 8px;
+  border-radius: 999px;
+  display: inline-block;
+  font-size: 12px;
+  margin-top: 6px;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 10;
+  inset: 0;
+  background: rgba(0,0,0,.85);
+  padding: 30px;
+  overflow-y: auto;
+}
+
+.modalContent {
+  max-width: 850px;
+  margin: auto;
+  background: #111;
+  border-radius: 18px;
+  padding: 25px;
+  text-align: left;
+}
+
+.close {
+  float: right;
+  font-size: 28px;
+  cursor: pointer;
+}
+
+.modalTop {
+  display: flex;
+  gap: 25px;
+  flex-wrap: wrap;
+}
+
+.modalTop img {
+  width: 240px;
+  border-radius: 12px;
+}
+
+.modalInfo {
+  flex: 1;
+  min-width: 250px;
+}
+
+.actionLink {
+  display: inline-block;
+  margin-top: 12px;
+  margin-right: 10px;
+  padding: 12px 18px;
+  background: #e50914;
+  color: white;
+  text-decoration: none;
+  border-radius: 999px;
+  font-weight: bold;
+}
+
+.secondary {
+  background: #333;
+}
+
+@media (max-width: 650px) {
+  input {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+
+  button {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .modalTop img {
+    width: 100%;
+  }
+}
 </style>
-
 </head>
 
 <body>
 
 <div class="container">
+  <h1>Watch What You Want</h1>
+  <p class="subtitle">Search movies, see posters, ratings, trailers, and where to watch.</p>
 
-<h1>Watch What You Want</h1>
+  <div class="searchArea">
+    <input id="searchBox" placeholder="Search Batman, Top Gun, Avengers..." />
+    <button onclick="searchMovies()">Search</button>
+  </div>
 
-<input id="searchBox" placeholder="Search movies..." />
+  <div id="results" class="grid"></div>
+</div>
 
-<button onclick="search()">Search</button>
-
-<div id="results" class="grid"></div>
-
+<div id="movieModal" class="modal">
+  <div class="modalContent">
+    <span class="close" onclick="closeModal()">&times;</span>
+    <div id="modalBody"></div>
+  </div>
 </div>
 
 <script>
+const API_KEY = "PASTE_YOUR_KEY_HERE";
 
-const API_KEY = "b863c63714c639df3e613a7adbb57f34"
+async function searchMovies() {
+  const query = document.getElementById("searchBox").value.trim();
+  const resultsDiv = document.getElementById("results");
 
-async function search() {
-
-const query = document.getElementById("searchBox").value.trim();
-
-const resultsDiv = document.getElementById("results");
-
-if (!query) {
-
-resultsDiv.innerHTML = "Type a movie name first."
-
-return;
-
-}
-
-resultsDiv.innerHTML = "Loading..."
-
-try {
-
-const res = await fetch(
-
-`https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(query)}`
-
-);
-
-const data = await res.json();
-
-resultsDiv.innerHTML = ""
-for (const movie of data.results.slice(0, 8)) {
-
-  const poster = movie.poster_path
-    ? "https://image.tmdb.org/t/p/w500" + movie.poster_path
-    : "";
-
-  const providerRes = await fetch(
-    `https://api.themoviedb.org/3/movie/${movie.id}/watch/providers?api_key=${API_KEY}`
-  );
-
-  const providerData = await providerRes.json();
-
-  let providers = [];
-
-  if (providerData.results && providerData.results.US) {
-    const us = providerData.results.US;
-
-    if (us.flatrate) {
-      providers = us.flatrate.map(p => p.provider_name);
-    } else if (us.rent) {
-      providers = us.rent.map(p => p.provider_name);
-    } else if (us.buy) {
-      providers = us.buy.map(p => p.provider_name);
-    }
+  if (!query) {
+    resultsDiv.innerHTML = "Type a movie name first.";
+    return;
   }
 
-  const providerText = providers.length
-    ? providers.slice(0, 3).join(", ")
-    : "No streaming info";
+  resultsDiv.innerHTML = "Loading movies...";
 
-  const watchLink =
-    providerData.results && providerData.results.US && providerData.results.US.link
-      ? providerData.results.US.link
-      : `https://www.themoviedb.org/movie/${movie.id}`;
+  try {
+    const res = await fetch(
+      `https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(query)}`
+    );
 
-  resultsDiv.innerHTML += `
-   <a href="${watchLink}" target="_blank" class="card">
-      <img src="${poster}" />
-      <p><strong>${movie.title}</strong></p>
-      <p style="font-size:12px;color:#ccc;">${providerText}</p>
-    </a>
-  `;
-}
-for (const movie of data.results.slice(0, 8)) {
+    const data = await res.json();
+    resultsDiv.innerHTML = "";
 
-const poster = movie.poster_path
+    for (const movie of data.results.slice(0, 12)) {
+      const poster = movie.poster_path
+        ? "https://image.tmdb.org/t/p/w500" + movie.poster_path
+        : "";
 
-? "https://image.tmdb.org/t/p/w500" + movie.poster_path
+      const year = movie.release_date ? movie.release_date.substring(0, 4) : "Unknown";
+      const rating = movie.vote_average ? movie.vote_average.toFixed(1) : "N/A";
 
-: ""
+      resultsDiv.innerHTML += `
+        <div class="card" onclick="openMovieDetails(${movie.id})">
+          <img src="${poster}" />
+          <div class="cardText">
+            <strong>${movie.title}</strong>
+            <p>${year} • ⭐ ${rating}</p>
+            <span class="badge">View details</span>
+          </div>
+        </div>
+      `;
+    }
 
-// 🔥 get providers
-
-const providerRes = await fetch(
-
-`https://api.themoviedb.org/3/movie/${movie.id}/watch/providers?api_key=${API_KEY}`
-
-);
-
-const providerData = await providerRes.json();
-
-let providers = [];
-
-if (providerData.results && providerData.results.US) {
-
-const us = providerData.results.US;
-
-if (us.flatrate) {
-
-providers = us.flatrate.map(p => p.provider_name);
-
-} else if (us.rent) {
-
-providers = us.rent.map(p => p.provider_name);
-
-} else if (us.buy) {
-
-providers = us.buy.map(p => p.provider_name);
-
+  } catch (error) {
+    console.error(error);
+    resultsDiv.innerHTML = "Something went wrong loading movies.";
+  }
 }
 
+async function openMovieDetails(movieId) {
+  const modal = document.getElementById("movieModal");
+  const modalBody = document.getElementById("modalBody");
+
+  modal.style.display = "block";
+  modalBody.innerHTML = "Loading details...";
+
+  try {
+    const movieRes = await fetch(
+      `https://api.themoviedb.org/3/movie/${movieId}?api_key=${API_KEY}`
+    );
+
+    const providerRes = await fetch(
+      `https://api.themoviedb.org/3/movie/${movieId}/watch/providers?api_key=${API_KEY}`
+    );
+
+    const videoRes = await fetch(
+      `https://api.themoviedb.org/3/movie/${movieId}/videos?api_key=${API_KEY}`
+    );
+
+    const movie = await movieRes.json();
+    const providerData = await providerRes.json();
+    const videoData = await videoRes.json();
+
+    const poster = movie.poster_path
+      ? "https://image.tmdb.org/t/p/w500" + movie.poster_path
+      : "";
+
+    let providers = [];
+    let watchLink = `https://www.themoviedb.org/movie/${movieId}`;
+
+    if (providerData.results && providerData.results.US) {
+      const us = providerData.results.US;
+      watchLink = us.link || watchLink;
+
+      if (us.flatrate) {
+        providers = us.flatrate.map(p => p.provider_name);
+      } else if (us.rent) {
+        providers = us.rent.map(p => p.provider_name);
+      } else if (us.buy) {
+        providers = us.buy.map(p => p.provider_name);
+      }
+    }
+
+    const trailer = videoData.results.find(
+      v => v.site === "YouTube" && v.type === "Trailer"
+    );
+
+    const trailerLink = trailer
+      ? `https://www.youtube.com/watch?v=${trailer.key}`
+      : null;
+
+    modalBody.innerHTML = `
+      <div class="modalTop">
+        <img src="${poster}" />
+        <div class="modalInfo">
+          <h2>${movie.title}</h2>
+          <p><strong>Release:</strong> ${movie.release_date || "Unknown"}</p>
+          <p><strong>Rating:</strong> ⭐ ${movie.vote_average ? movie.vote_average.toFixed(1) : "N/A"}</p>
+          <p>${movie.overview || "No description available."}</p>
+
+          <p><strong>Where to watch:</strong><br>
+          ${providers.length ? providers.join(", ") : "No streaming info found"}</p>
+
+          <a class="actionLink" href="${watchLink}" target="_blank">Where to Watch</a>
+          ${trailerLink ? `<a class="actionLink secondary" href="${trailerLink}" target="_blank">Watch Trailer</a>` : ""}
+        </div>
+      </div>
+    `;
+
+  } catch (error) {
+    console.error(error);
+    modalBody.innerHTML = "Something went wrong loading movie details.";
+  }
 }
 
-const providerText = providers.length
-
-? providers.slice(0, 3).join(", ")
-
-: "No streaming info";
-
-resultsDiv.innerHTML += `
-
-<div class="card">
-
-<img src="${poster}" />
-
-<p><strong>${movie.title}</strong></p>
-
-<p style="font-size:12px;color:#ccc;">${providerText}</p>
-
-</div>
-
-`;
-
+function closeModal() {
+  document.getElementById("movieModal").style.display = "none";
 }
-
-} catch (error) {
-
-resultsDiv.innerHTML = "Something went wrong."
-
-console.error(error);
-
-}
-
-}
-
 </script>
 
 </body>
-
 </html>
