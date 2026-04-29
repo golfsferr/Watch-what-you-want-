@@ -311,8 +311,9 @@ function renderMovies(movies) {
     const poster = movie.poster_path
       ? "https://image.tmdb.org/t/p/w500" + movie.poster_path
       : "";
-
-    const year = movie.release_date ? movie.release_date.substring(0, 4) : "Unknown";
+onst year = movie.rel
+    const date = movie.release_date || movie.first_air_date;
+const year = date ? date.substring(0, 4) : "Unknown";
     const rating = movie.vote_average ? movie.vote_average.toFixed(1) : "N/A";
 
     resultsDiv.innerHTML += `
