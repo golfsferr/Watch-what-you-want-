@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta name="google-site-verification" content="4x5wflrrQkmUnE8YaUCdAK4jT5UJzwfCBxa7QH92B8I" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Watch What You Want</title>
 
@@ -58,10 +57,6 @@ button {
   max-width: 1250px;
   margin: auto;
   padding: 25px 20px;
-}
-
-.section h2 {
-  margin-left: 5px;
 }
 
 .grid {
@@ -201,10 +196,10 @@ button {
 
 <div class="hero">
   <h1>Watch What You Want</h1>
-  <p class="subtitle">Search movies, see ratings, trailers, and where to watch.</p>
+  <p class="subtitle">Search movies and TV shows. See ratings, trailers, and where to watch.</p>
 
   <div class="searchArea">
-    <input id="searchBox" placeholder="Search Batman, Top Gun, Avengers..." onkeydown="if(event.key==='Enter') searchMovies()" />
+    <input id="searchBox" placeholder="Search Batman, Imperfect Women, Top Gun..." onkeydown="if(event.key==='Enter') searchMovies()" />
     <button onclick="searchMovies()">Search</button>
   </div>
 </div>
@@ -221,10 +216,10 @@ button {
   </div>
 </div>
 
-<p class="footerNote">Movie data powered by TMDb. Streaming availability may vary by region.</p>
+<p class="footerNote">Movie and TV data powered by TMDb. Streaming availability may vary by region.</p>
 
 <script>
-const API_KEY = "b863c63714c639df3e613a7adbb57f34";
+const API_KEY = "b863c63714c639df3e613a7adbb57f34E";
 
 async function loadTrending() {
   const resultsDiv = document.getElementById("results");
@@ -239,7 +234,7 @@ async function loadTrending() {
     );
 
     const data = await res.json();
-    renderMovies(data.results.slice(0, 12));
+    renderResults(data.results.slice(0, 12));
 
   } catch (error) {
     console.error(error);
@@ -267,12 +262,16 @@ async function searchMovies() {
 
     const data = await res.json();
 
-    if (!data.results || data.results.length === 0) {
+    const filtered = data.results.filter(item =>
+      item.media_type === "movie" || item.media_type === "tv"
+    );
+
+    if (!filtered.length) {
       resultsDiv.innerHTML = "No results found.";
       return;
     }
 
-    renderMovies(data.results.slice(0, 12));
+    renderResults(filtered.slice(0, 12));
 
   } catch (error) {
     console.error(error);
@@ -280,56 +279,35 @@ async function searchMovies() {
   }
 }
 
-  sectionTitle.innerText = `Search Results: ${query}`;
-  resultsDiv.innerHTML = "Searching...";
-
-  try {
-    const res = await fetch(
-      ``https://api.themoviedb.org/3/search/multi?api_key=${API_KEY}&query=${encodeURIComponent(query)}
-    );
-
-    const data = await res.json();
-
-    if (!data.results || data.results.length === 0) {
-      resultsDiv.innerHTML = "No movies found.";
-      return;
-    }
-
-    renderMovies(data.results.slice(0, 12));
-
-  } catch (error) {
-    console.error(error);
-    resultsDiv.innerHTML = "Something went wrong searching movies.";
-  }
-}
-
-function renderMovies(movies) {
+function renderResults(items) {
   const resultsDiv = document.getElementById("results");
   resultsDiv.innerHTML = "";
 
-  movies.forEach(movie => {
-    const poster = movie.poster_path
-      ? "https://image.tmdb.org/t/p/w500" + movie.poster_path
+  items.forEach(item => {
+    const poster = item.poster_path
+      ? "https://image.tmdb.org/t/p/w500" + item.poster_path
       : "";
-onst year = movie.rel
-    const date = movie.release_date || movie.first_air_date;
-const year = date ? date.substring(0, 4) : "Unknown";
-    const rating = movie.vote_average ? movie.vote_average.toFixed(1) : "N/A";
+
+    const title = item.title || item.name || "Untitled";
+    const date = item.release_date || item.first_air_date;
+    const year = date ? date.substring(0, 4) : "Unknown";
+    const rating = item.vote_average ? item.vote_average.toFixed(1) : "N/A";
+    const type = item.media_type === "tv" ? "TV Show" : "Movie";
 
     resultsDiv.innerHTML += `
-      <div class="card" onclick="openMovieDetails(${movie.id})">
+      <div class="card" onclick="openDetails(${item.id}, '${item.media_type}')">
         <img src="${poster}" />
         <div class="cardText">
-          <strong>${movie.title || movie.name}</strong>
+          <strong>${title}</strong>
           <p>${year} • ⭐ ${rating}</p>
-          <span class="badge">View Details</span>
+          <span class="badge">${type}</span>
         </div>
       </div>
     `;
   });
 }
 
-async function openMovieDetails(movieId) {
+async function openDetails(id, type) {
   const modal = document.getElementById("movieModal");
   const modalBody = document.getElementById("modalBody");
 
@@ -337,92 +315,91 @@ async function openMovieDetails(movieId) {
   modalBody.innerHTML = "Loading details...";
 
   try {
-    const movieRes = await fetch(
-      `https://api.themoviedb.org/3/movie/${movieId}?api_key=${API_KEY}`
+    const detailsRes = await fetch(
+      `https://api.themoviedb.org/3/${type}/${id}?api_key=${API_KEY}`
     );
 
     const providerRes = await fetch(
-      `https://api.themoviedb.org/3/movie/${movieId}/watch/providers?api_key=${API_KEY}`
+      `https://api.themoviedb.org/3/${type}/${id}/watch/providers?api_key=${API_KEY}`
     );
 
     const videoRes = await fetch(
-      `https://api.themoviedb.org/3/movie/${movieId}/videos?api_key=${API_KEY}`
+      `https://api.themoviedb.org/3/${type}/${id}/videos?api_key=${API_KEY}`
     );
 
-    const movie = await movieRes.json();
+    const item = await detailsRes.json();
     const providerData = await providerRes.json();
     const videoData = await videoRes.json();
 
-    const poster = movie.poster_path
-      ? "https://image.tmdb.org/t/p/w500" + movie.poster_path
+    const title = item.title || item.name || "Untitled";
+
+    const poster = item.poster_path
+      ? "https://image.tmdb.org/t/p/w500" + item.poster_path
       : "";
 
+    const date = item.release_date || item.first_air_date || "Unknown";
+    const rating = item.vote_average ? item.vote_average.toFixed(1) : "N/A";
+
     let providers = [];
-    let watchLink = `https://www.themoviedb.org/movie/${movieId}`;
+    let watchLink = `https://www.themoviedb.org/${type}/${id}`;
 
     if (providerData.results && providerData.results.US) {
       const us = providerData.results.US;
       watchLink = us.link || watchLink;
 
-     if (us.flatrate) {
-  providers = us.flatrate;
-} else if (us.rent) {
-  providers = us.rent;
-} else if (us.buy) {
-  providers = us.buy;
-}
+      if (us.flatrate) {
+        providers = us.flatrate;
+      } else if (us.rent) {
+        providers = us.rent;
+      } else if (us.buy) {
+        providers = us.buy;
+      }
     }
 
     const trailer = videoData.results.find(
       v => v.site === "YouTube" && v.type === "Trailer"
     );
 
-    const trailerLink = trailer
-      ? `https://www.youtube.com/watch?v=${trailer.key}`
-      : null;
-
     modalBody.innerHTML = `
       <div class="modalTop">
         <img src="${poster}" />
         <div class="modalInfo">
-          <h2>${movie.title || movie.name}</h2>
-          <p><strong>Release:</strong> ${movie.release_date || "Unknown"}</p>
-          <p><strong>Rating:</strong> ⭐ ${movie.vote_average ? movie.vote_average.toFixed(1) : "N/A"}</p>
-          <p>${movie.overview || "No description available."}</p>
+          <h2>${title}</h2>
+          <p><strong>Type:</strong> ${type === "tv" ? "TV Show" : "Movie"}</p>
+          <p><strong>Release:</strong> ${date}</p>
+          <p><strong>Rating:</strong> ⭐ ${rating}</p>
+          <p>${item.overview || "No description available."}</p>
 
           <p><strong>Where to watch:</strong></p>
           <div>
             ${
               providers.length
                 ? providers.map(p => `
-  <span class="badge">
-    ${p.logo_path ? `<img src="https://image.tmdb.org/t/p/w92${p.logo_path}" style="height:24px;vertical-align:middle;border-radius:6px;margin-right:6px;">` : ""}
-    ${p.provider_name}
-  </span>
-`).join(" ")
+                    <span class="badge">
+                      ${p.logo_path ? `<img src="https://image.tmdb.org/t/p/w92${p.logo_path}" style="height:24px;vertical-align:middle;border-radius:6px;margin-right:6px;">` : ""}
+                      ${p.provider_name}
+                    </span>
+                  `).join(" ")
                 : "<span class='badge'>No streaming info</span>"
             }
           </div>
 
           <a class="actionLink" href="${watchLink}" target="_blank">Where to Watch</a>
-         ${trailer ? `
-  <div style="margin-top:20px;">
-    <iframe 
-      width="100%" 
-      height="315" 
-      src="https://www.youtube.com/embed/${trailer.key}" 
-      frameborder="0" 
-      allowfullscreen>
-    </iframe>
-  </div>
-` : ""}
         </div>
       </div>
+
+      ${
+        trailer
+          ? `<div style="margin-top:25px;">
+              <iframe width="100%" height="360" src="https://www.youtube.com/embed/${trailer.key}" frameborder="0" allowfullscreen></iframe>
+             </div>`
+          : ""
+      }
     `;
 
   } catch (error) {
     console.error(error);
-    modalBody.innerHTML = "Something went wrong loading movie details.";
+    modalBody.innerHTML = "Something went wrong loading details.";
   }
 }
 
