@@ -375,7 +375,17 @@ async function openMovieDetails(movieId) {
           </div>
 
           <a class="actionLink" href="${watchLink}" target="_blank">Where to Watch</a>
-          ${trailerLink ? `<a class="actionLink secondary" href="${trailerLink}" target="_blank">Watch Trailer</a>` : ""}
+         ${trailer ? `
+  <div style="margin-top:20px;">
+    <iframe 
+      width="100%" 
+      height="315" 
+      src="https://www.youtube.com/embed/${trailer.key}" 
+      frameborder="0" 
+      allowfullscreen>
+    </iframe>
+  </div>
+` : ""}
         </div>
       </div>
     `;
