@@ -339,13 +339,13 @@ async function openMovieDetails(movieId) {
       const us = providerData.results.US;
       watchLink = us.link || watchLink;
 
-      if (us.flatrate) {
-        providers = us.flatrate.map(p => p.provider_name);
-      } else if (us.rent) {
-        providers = us.rent.map(p => p.provider_name);
-      } else if (us.buy) {
-        providers = us.buy.map(p => p.provider_name);
-      }
+     if (us.flatrate) {
+  providers = us.flatrate;
+} else if (us.rent) {
+  providers = us.rent;
+} else if (us.buy) {
+  providers = us.buy;
+}
     }
 
     const trailer = videoData.results.find(
