@@ -36,7 +36,7 @@ margin: auto;
 
 h1 {
 
-font-size: 50px;
+font-size: 48px;
 
 }
 
@@ -122,64 +122,81 @@ font-size: 14px;
 
 <script>
 
-const API_KEY = "b863c63714c639df3e613a7adbb57f34";
+const API_KEY = "PASTE_YOUR_KEY_HERE"
 
-async function search()  {
-  const query = document.getElementById("searchBox").value.trim();
-  const resultsDiv = document.getElementById("results");
+async function search() {
 
-  if (!query) {
-    resultsDiv.innerHTML = "Type a movie name first.";
-    return;
-  }
+const query = document.getElementById("searchBox").value.trim();
 
-  resultsDiv.innerHTML = "Loading...";
+const resultsDiv = document.getElementById("results");
 
-  const res = await fetch(
-    `https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(query)}`
-  );
+if (!query) {
 
-  const data = await res.json();
-  resultsDiv.innerHTML = "";
+resultsDiv.innerHTML = "Type a movie name first."
 
-  for (const movie of data.results.slice(0, 8)) {
-    const poster = movie.poster_path
-      ? "https://image.tmdb.org/t/p/w500" + movie.poster_path
-      : "";
+return;
 
-    const providerRes = await fetch(
-      `https://api.themoviedb.org/3/movie/${movie.id}/watch/providers?api_key=${API_KEY}`
-    );
-
-    const providerData = await providerRes.json();
-
-    let providers = [];
-
-    if (providerData.results && providerData.results.US) {
-      const us = providerData.results.US;
-      if (us.flatrate) providers = us.flatrate.map(p => p.provider_name);
-      else if (us.rent) providers = us.rent.map(p => p.provider_name);
-      else if (us.buy) providers = us.buy.map(p => p.provider_name);
-    }
-
-    const providerText = providers.length
-      ? providers.slice(0, 3).join(", ")
-      : "No streaming info found";
-
-    resultsDiv.innerHTML += `
-      <div class="card">
-        <img src="${poster}" />
-        <p><strong>${movie.title}</strong></p>
-        <p style="font-size:12px;color:#ccc;">${providerText}</p>
-      </div>
-    `;
-  }
 }
+
+resultsDiv.innerHTML = "Loading..."
+
+try {
+
+const res = await fetch(
+
+`https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(query)}`
+
+);
+
+const data = await res.json();
+
+resultsDiv.innerHTML = ""
+
+for (const movie of data.results.slice(0, 8)) {
+
+const poster = movie.poster_path
+
+? "https://image.tmdb.org/t/p/w500" + movie.poster_path
+
+: ""
+
+// 🔥 get providers
+
+const providerRes = await fetch(
+
+`https://api.themoviedb.org/3/movie/${movie.id}/watch/providers?api_key=${API_KEY}`
+
+);
+
+const providerData = await providerRes.json();
+
+let providers = [];
+
+if (providerData.results && providerData.results.US) {
+
+const us = providerData.results.US;
+
+if (us.flatrate) {
+
+providers = us.flatrate.map(p => p.provider_name);
+
+} else if (us.rent) {
+
+providers = us.rent.map(p => p.provider_name);
+
+} else if (us.buy) {
+
+providers = us.buy.map(p => p.provider_name);
+
+}
+
+}
+
 const providerText = providers.length
 
 ? providers.slice(0, 3).join(", ")
 
-: "Not available"
+: "No streaming info"
 
 resultsDiv.innerHTML += `
 
@@ -197,44 +214,13 @@ resultsDiv.innerHTML += `
 
 }
 
+} catch (error) {
+
+resultsDiv.innerHTML = "Something went wrong."
+
+console.error(error);
+
 }
-
-
-const query = document.getElementById("searchBox").value;
-
-const res = await fetch(
-
-`https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${query}`
-
-);
-
-const data = await res.json();
-
-const results = document.getElementById("results");
-
-results.innerHTML = ""
-
-data.results.forEach(movie => {
-
-const poster = movie.poster_path
-
-? "https://image.tmdb.org/t/p/w500" + movie.poster_path
-
-: ""
-
-results.innerHTML += `
-
-<div class="card">
-
-<img src="${poster}" />
-
-<p>${movie.title}</p>
-
-</div>
-
-`;
-
-});
 
 }
 
