@@ -369,7 +369,12 @@ async function openMovieDetails(movieId) {
           <div>
             ${
               providers.length
-                ? providers.map(p => `<span class="badge">${p}</span>`).join(" ")
+                ? providers.map(p => `
+  <span class="badge">
+    ${p.logo_path ? `<img src="https://image.tmdb.org/t/p/w92${p.logo_path}" style="height:24px;vertical-align:middle;border-radius:6px;margin-right:6px;">` : ""}
+    ${p.provider_name}
+  </span>
+`).join(" ")
                 : "<span class='badge'>No streaming info</span>"
             }
           </div>
