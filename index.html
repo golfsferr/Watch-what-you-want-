@@ -120,13 +120,31 @@ function openDetails(id, type) {
       const date = item.release_date || item.first_air_date || "Unknown";
       const rating = item.vote_average ? item.vote_average.toFixed(1) : "N/A";
 
-      modalBody.innerHTML = `
-        <h2>${title}</h2>
-        <p><strong>Release:</strong> ${date}</p>
-        <p><strong>Rating:</strong> ⭐ ${rating}</p>
-        <p>${item.overview || "No description available."}</p>
-       <a href="https://www.google.com/search?q=watch+${encodeURIComponent(title)}" target="_blank" style="color:white;background:#e50914;padding:12px 18px;border-radius:999px;text-decoration:none;">Where to Watch</a>
-      `;
+    const poster = item.poster_path
+  ? "https://image.tmdb.org/t/p/w500" + item.poster_path
+  : "";
+
+modalBody.innerHTML = `
+  <div style="display:flex;gap:20px;flex-wrap:wrap;">
+    
+    <img src="${poster}" style="width:220px;border-radius:12px;background:#222;">
+    
+    <div style="flex:1;min-width:250px;">
+      <h2>${title}</h2>
+      <p><strong>Release:</strong> ${date}</p>
+      <p><strong>Rating:</strong> ⭐ ${rating}</p>
+      <p>${item.overview || "No description available."}</p>
+
+      <a href="https://www.google.com/search?q=watch+${encodeURIComponent(title)}"
+         target="_blank"
+         style="color:white;background:#e50914;padding:12px 18px;border-radius:999px;text-decoration:none;">
+         Where to Watch
+      </a>
+
+    </div>
+
+  </div>
+`;
     })
     .catch(error => {
       console.log(error);
