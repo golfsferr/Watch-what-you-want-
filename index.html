@@ -135,13 +135,14 @@ function openDetails(id, type) {
     .then(item => {
 
       const title = item.title || item.name || "Untitled";
-
+const date = item.release_date || item.first_air_date || "Unknown";
       const poster = item.poster_path
         ? "https://image.tmdb.org/t/p/w500" + item.poster_path
         : "";
 
       body.innerHTML = `
         <h2>${title}</h2>
+        <p><strong>Release:</strong> ${item.release_date || item.first_air_date || "Unknown"}</p>
         <img src="${poster}" style="width:200px">
         <p>${item.overview || ""}</p>
 
