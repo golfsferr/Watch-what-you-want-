@@ -151,7 +151,49 @@ const res = await fetch(
 const data = await res.json();
 
 resultsDiv.innerHTML = ""
+for (const movie of data.results.slice(0, 8)) {
 
+  const poster = movie.poster_path
+    ? "https://image.tmdb.org/t/p/w500" + movie.poster_path
+    : "";
+
+  const providerRes = await fetch(
+    `https://api.themoviedb.org/3/movie/${movie.id}/watch/providers?api_key=${API_KEY}`
+  );
+
+  const providerData = await providerRes.json();
+
+  let providers = [];
+
+  if (providerData.results && providerData.results.US) {
+    const us = providerData.results.US;
+
+    if (us.flatrate) {
+      providers = us.flatrate.map(p => p.provider_name);
+    } else if (us.rent) {
+      providers = us.rent.map(p => p.provider_name);
+    } else if (us.buy) {
+      providers = us.buy.map(p => p.provider_name);
+    }
+  }
+
+  const providerText = providers.length
+    ? providers.slice(0, 3).join(", ")
+    : "No streaming info";
+
+  const watchLink =
+    providerData.results && providerData.results.US && providerData.results.US.link
+      ? providerData.results.US.link
+      : `https://www.themoviedb.org/movie/${movie.id}`;
+
+  resultsDiv.innerHTML += `
+    <a href="${watchLink}" target="_blank" class="card" style="text-decoration:none;color:white;">
+      <img src="${poster}" />
+      <p><strong>${movie.title}</strong></p>
+      <p style="font-size:12px;color:#ccc;">${providerText}</p>
+    </a>
+  `;
+}
 for (const movie of data.results.slice(0, 8)) {
 
 const poster = movie.poster_path
