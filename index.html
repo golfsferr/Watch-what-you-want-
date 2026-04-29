@@ -262,6 +262,29 @@ async function searchMovies() {
 
   try {
     const res = await fetch(
+      `https://api.themoviedb.org/3/search/multi?api_key=${API_KEY}&query=${encodeURIComponent(query)}`
+    );
+
+    const data = await res.json();
+
+    if (!data.results || data.results.length === 0) {
+      resultsDiv.innerHTML = "No results found.";
+      return;
+    }
+
+    renderMovies(data.results.slice(0, 12));
+
+  } catch (error) {
+    console.error(error);
+    resultsDiv.innerHTML = "Something went wrong searching.";
+  }
+}
+
+  sectionTitle.innerText = `Search Results: ${query}`;
+  resultsDiv.innerHTML = "Searching...";
+
+  try {
+    const res = await fetch(
       ``https://api.themoviedb.org/3/search/multi?api_key=${API_KEY}&query=${encodeURIComponent(query)}
     );
 
