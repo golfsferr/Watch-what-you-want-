@@ -178,20 +178,25 @@ function openDetails(id, type) {
 
     let providers = [];
 
-    if (providersData.results && providersData.results.US) {
-      const us = providersData.results.US;
+   if (providersData.results && providersData.results.US) {
+  const us = providersData.results.US;
 
-      if (us.flatrate) providers = us.flatrate;
-      else if (us.rent) providers = us.rent;
-      else if (us.buy) providers = us.buy;
-    }
+  // PRIORITY: rent & buy first (PPV)
+  if (us.rent) {
+    providers = us.rent;
+  } else if (us.buy) {
+    providers = us.buy;
+  } else if (us.flatrate) {
+    providers = us.flatrate;
+  }
+}
 
     const providerButtons = providers.length
       ? providers.map(p => `
           <a class="badge"
              href="https://www.google.com/search?q=${encodeURIComponent(p.provider_name + " " + title + " watch")}"
              target="_blank">
-             ${p.provider_name}
+             ${p.provider_name} (Rent/Buy)
           </a>
         `).join("")
       : "<span class='badge'>No streaming info</span>";
