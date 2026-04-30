@@ -230,7 +230,11 @@ function openDetails(id, type) {
       <img src="${poster}" style="width:200px">
       <p>${item.overview || ""}</p>
 
-      <div><strong>Available on:</strong><br>${providerButtons}</div>
+      <p style="font-weight:bold;margin-top:10px;">
+  Choose where to watch:
+</p>
+
+<div>${providerButtons}</div>
 
       <a class="action"
         href="https://www.amazon.com/s?k=${encodeURIComponent(title + " movie")}&tag=justus1ktp-20"
