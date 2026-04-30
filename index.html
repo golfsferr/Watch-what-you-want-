@@ -211,6 +211,7 @@ function showCards(items) {
 
   items.slice(0, 18).forEach(item => {
     const title = item.title || item.name || "Untitled";
+    const amazonLink = "https://www.amazon.com/s?k=" + encodeURIComponent(title + " movie") + "&tag=" + AMAZON_TAG;
     const type = item.media_type || "movie";
     const date = item.release_date || item.first_air_date || "";
     const year = date ? date.substring(0, 4) : "Unknown";
