@@ -305,8 +305,10 @@ function openDetails(id, type) {
 
         <div class="modalInfo">
           <h2>${title}</h2>
-<a class="bigButton" href="${amazonLink}" target="_blank">
-  🔥 Watch Now – Rent or Buy Instantly
+<a class="bigButton" href="${type === "tv"
+  ? "https://www.justwatch.com/us/search?q=" + encodeURIComponent(title)
+  : amazonLink}" target="_blank">
+  🔥 ${type === "tv" ? "Find Latest Episode" : "Watch Now – Rent or Buy Instantly"}
 </a>
 <p style="color:#00ffcc;font-size:15px;margin-top:6px;font-weight:bold;">
   💲 Check current rent/buy price on Amazon
